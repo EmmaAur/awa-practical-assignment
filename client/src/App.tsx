@@ -1,6 +1,6 @@
 import './App.css'
-import MyContainer from './components/MyContainer'
-import About from './components/About'
+import Home from './components/Home'
+import Board from './components/Board'
 import Header from './components/Header'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
@@ -10,13 +10,13 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path='/about' element= {<>
+          <Route path='/board' element= {<>
             <Header></Header>
-            <About></About>
+            <Board></Board>
           </>} />
           <Route path='/' element= {<>
             <Header></Header>
-            <MyContainer></MyContainer>
+            <Home></Home>
           </>} />
         </Routes>
       </BrowserRouter>

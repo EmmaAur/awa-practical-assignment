@@ -1,0 +1,21 @@
+.app-bar {
+    align-items: left;
+    background-color: lightcoral;
+    display: flex;
+    column-gap: 50%;
+} 
+
+.header-text {
+    margin-left: 10px;
+    margin-right: 10px;
+} 
+
+.header-button {
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: white
+} 
+
+.login {
+    text-align: right;
+}

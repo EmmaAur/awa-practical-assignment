@@ -1,36 +1,30 @@
 /*
-Week 10 code
+Sources:
+toolbar not blocking other components: https://stackoverflow.com/questions/56436811/why-are-there-two-toolbar-components-needed-to-render-correctly-in-the-materi
 */
 
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Suspense } from 'react'
 import { changeLanguage } from 'i18next'
+import '../styles/header.css'
+import { AppBar, Button, Toolbar } from "@mui/material"
 
 const Header = () => {
-    const {t, i18n} = useTranslation()
-    const changeLanguage = (lng: string) => {
-        i18n.changeLanguage(lng)
-    }
+    
     return (
         <header className="header">
-            <h1>Very cool header</h1>
-            <nav>
-                <ul>
-                    <Link to='/'>{t("Home")}</Link>
-                    <Link to='/about'>{t("About")}</Link>
-                    <button id="fi" onClick={() => changeLanguage("fi")}>FI</button>
-                    <button id="en" onClick={() => changeLanguage("en")}>EN</button>
-                </ul>
-            </nav>
+            <AppBar className="app-bar">
+                <Toolbar spacing={2}>
+                    <h3 className="header-text">Very cool header</h3>
+                    <Button className="header-button" variant="contained" href='/'>Home</Button>
+                    <Button className="header-button" variant="contained" href='/board'>Board</Button>
+
+                    <Button className="login" variant="contained" href='/'>Log in</Button>
+                </Toolbar>
+            </AppBar>
+            <Toolbar/>
         </header>
     )
 }
 
-export default function App() {
-    return (
-        <Suspense fallback="loading">
-            <Header />
-        </Suspense>
-    );
-}
+export default Header
