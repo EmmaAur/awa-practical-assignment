@@ -6,17 +6,15 @@ toolbar not blocking other components: https://stackoverflow.com/questions/56436
 import '../styles/header.css'
 import { AppBar, Button, Toolbar } from "@mui/material"
 
-const Header = () => {
+const HeaderLogin = () => {
     
     return (
         <header className="header">
             <AppBar className="app-bar">
                 <Toolbar>
                     <h3 className="header-text">Very cool header</h3>
-                    <Button className="header-button" variant="contained" href='/'>Home</Button>
-                    <Button className="header-button" variant="contained" href='/board'>Board</Button>
-
-                    <Button className="logout" variant="contained" href='/logout'>Log out</Button>
+                    <Button className="register" variant="contained" href='/register'>Register</Button>
+                    <Button className="login" variant="contained" href='/login'>Log in</Button>
                 </Toolbar>
             </AppBar>
             <Toolbar/>
@@ -24,4 +22,4 @@ const Header = () => {
     )
 }
 
-export default Header
+export default HeaderLogin

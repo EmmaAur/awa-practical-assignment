@@ -1,0 +1,23 @@
+/*
+Sources:
+Centering the login div: https://blog.hubspot.com/website/center-div-css#center-div-css
+Round div corners: https://www.w3schools.com/css/css3_borders.asp
+
+*/
+
+
+.login-div {
+    border-radius: 5px;
+    display: grid;
+    background-color: white;
+    gap: 16px;
+    padding: 16px;
+    max-width: 30%;
+    margin: auto;
+    margin-top: 10%;
+    min-width: 200px;
+}
+
+.login-button {
+    max-width: 50%;
+}
