@@ -1,6 +1,7 @@
 import './App.css'
 import Board from './components/Board'
 import Header from './components/Header'
+import Home from './components/Home'
 import HeaderLogin from './components/HeaderLogin'
 import Register from './components/Register'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
@@ -12,6 +13,11 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
+
+          <Route path='/home' element= {<>
+            <Header></Header>
+            <Home></Home>
+          </>} />
           
           <Route path='/board' element= {<>
             <Header></Header>

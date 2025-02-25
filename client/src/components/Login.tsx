@@ -4,14 +4,15 @@ import '../styles/login.css'
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 
+
 const Login = () => {
     const [password, setPassword] = useState<string>('')
-    const [username, setUsername] = useState<string>('')
+    const [email, setemail] = useState<string>('')
     
-    const fetchData = async (username: string, password: string) => {
+    const fetchData = async (password: string, email: string) => {
         const formData = {
             "password": password,
-            "username": username
+            "email": email
         }
 
         try {
@@ -21,12 +22,17 @@ const Login = () => {
                 body: JSON.stringify(formData)
             })
 
-            if (!response) {
+            if (!response.ok) {
                 throw new Error("Error fetching data")
             }
 
             const data = await response.json()
             console.log(data)
+            
+            if (data.token) {
+                localStorage.setItem("token", data.token)
+                window.location.href = '/home'
+            }
 
         } catch (error) {
             if (error instanceof Error) {
@@ -53,22 +59,23 @@ const Login = () => {
                 <TextField 
                     required
                     className="text-input" 
-                    label="username" 
+                    label="email" 
                     variant="standard"
-                    onChange={(e) => {setUsername(e.target.value)}}
+                    onChange={(e) => {setemail(e.target.value)}}
                 /><br></br>
                 <TextField 
                     required
                     className="text-input" 
                     label="password" 
                     variant="standard"
+                    type="password"
                     onChange={(e) => {setPassword(e.target.value)}}
                 /><br></br>
                 <Button 
                     className="login-button" 
                     variant="contained"
                     sx={{m:1, width: '25ch'}} 
-                    onClick={(e) => fetchData(username, password)}>Log in</Button>
+                    onClick={() => fetchData(password, email)}>Log in</Button>
             </Box>
         </div>
     )
