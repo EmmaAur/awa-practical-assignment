@@ -8,7 +8,6 @@ Round div corners: https://www.w3schools.com/css/css3_borders.asp
 
 .login-div {
     border-radius: 5px;
-    display: grid;
     background-color: white;
     gap: 16px;
     padding: 16px;

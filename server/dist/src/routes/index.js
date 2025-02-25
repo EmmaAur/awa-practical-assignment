@@ -11,7 +11,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const inputValidator_1 = require("../validators/inputValidator");
 const router = (0, express_1.Router)();
-router.post("/api/user/register/", inputValidator_1.registerValidation, async (req, res) => {
+router.post("/user/register/", inputValidator_1.registerValidation, async (req, res) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         console.log(errors);
@@ -42,7 +42,7 @@ router.post("/api/user/register/", inputValidator_1.registerValidation, async (r
         return;
     }
 });
-router.post("/api/user/login", inputValidator_1.loginValidation, async (req, res) => {
+router.post("/user/login", inputValidator_1.loginValidation, async (req, res) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         console.log(errors);

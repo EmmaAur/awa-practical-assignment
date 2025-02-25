@@ -20,9 +20,9 @@ const Register = () => {
     return (
         <div className='login-div'>
             <h1>Register</h1>
-            <TextField className="text-input" label="email" variant="standard">{email}</TextField><br></br>
-            <TextField className="text-input" label="username" variant="standard">{username}</TextField><br></br>
-            <TextField className="text-input" label="password" variant="standard">{password}</TextField><br></br>
+            <TextField className="text-input" label="email" variant="standard"/><br></br>
+            <TextField className="text-input" label="username" variant="standard"/><br></br>
+            <TextField className="text-input" label="password" variant="standard"/><br></br>
             <Button className="register-button" variant="contained" onClick={(e) => register(e)}>Log in</Button>
         </div>
     )

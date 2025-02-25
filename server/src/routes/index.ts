@@ -9,7 +9,7 @@ import {registerValidation, loginValidation} from "../validators/inputValidator"
 
 const router: Router = Router()
 
-router.post("/api/user/register/", registerValidation, async (req: Request, res: Response) => {
+router.post("/user/register/", registerValidation, async (req: Request, res: Response) => {
     const errors: Result<ValidationError> = validationResult(req)
     if (!errors.isEmpty()) {
         console.log(errors)
@@ -42,7 +42,7 @@ router.post("/api/user/register/", registerValidation, async (req: Request, res:
 })
 
 
-router.post("/api/user/login", loginValidation, async (req: Request, res: Response) => {
+router.post("/user/login", loginValidation, async (req: Request, res: Response) => {
     const errors: Result<ValidationError> = validationResult(req)
     if (!errors.isEmpty()) {
         console.log(errors)
