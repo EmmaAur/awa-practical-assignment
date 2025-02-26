@@ -62,7 +62,7 @@ router.post("/user/login", inputValidator_1.loginValidation, async (req, res) =>
                 _id: foundUser._id,
                 username: foundUser.username
             };
-            const token = jsonwebtoken_1.default.sign(jwtPayload, process.env.SECRET, { expiresIn: "2m" });
+            const token = jsonwebtoken_1.default.sign(jwtPayload, process.env.SECRET /*, {expiresIn: "15m"}*/);
             res.status(200).json({ success: true, token: token });
             return;
         }

@@ -64,7 +64,7 @@ router.post("/user/login", loginValidation, async (req: Request, res: Response) 
                 _id: foundUser._id,
                 username: foundUser.username
             }
-            const token: string = jwt.sign(jwtPayload, process.env.SECRET as string, {expiresIn: "2m"})
+            const token: string = jwt.sign(jwtPayload, process.env.SECRET as string/*, {expiresIn: "15m"}*/)
             res.status(200).json({success: true, token: token})
             return
         } else {

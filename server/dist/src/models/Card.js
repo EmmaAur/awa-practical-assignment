@@ -1,5 +1,4 @@
 "use strict";
-/* Copied from week 8 tasks */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -34,13 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.Card = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-let userSchema = new mongoose_1.Schema({
-    email: { type: String, required: true },
-    password: { type: String, required: true },
-    username: { type: String, required: true },
-    columns: { type: Number, required: true, default: 0 }
+let cardSchema = new mongoose_1.Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    color: { type: String, required: true },
+    comments: { type: String, required: false },
+    order: { type: Number, required: true },
+    createdAt: { type: Date, required: true, default: new Date() },
 });
-const User = mongoose_1.default.model("User", userSchema);
-exports.User = User;
+const Card = mongoose_1.default.model("Card", cardSchema);
+exports.Card = Card;

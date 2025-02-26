@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Box from '@mui/material/Box'
 
 
-const Login = () => {
+const Register = () => {
     const [password, setPassword] = useState<string>('')
     const [username, setUsername] = useState<string>('')
     const [email, setEmail] = useState<string>('')
@@ -34,15 +34,14 @@ const Login = () => {
 
         } catch (error) {
             if (error instanceof Error) {
-                console.log("Error when trying to log in")
+                console.log("Error when trying to register")
             }
         }
 
     }
 
     return (
-        <div className='login-div'>
-            
+        <>
             <Box
                 className="login-div"
                 component="form"
@@ -82,8 +81,8 @@ const Login = () => {
                     sx={{m:1, width: '25ch'}} 
                     onClick={() => fetchData(username, password, email)}>Register</Button>
             </Box>
-        </div>
+        </>
     )
 }
 
-export default Login
+export default Register

@@ -1,5 +1,5 @@
 "use strict";
-/* copied from week 7 tasks */
+/* copied from week 8 tasks */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -11,7 +11,7 @@ dotenv_1.default.config();
 const validateToken = (req, res, next) => {
     const token = req.header('authorization')?.split(" ")[1];
     if (!token) {
-        res.status(401).json({ message: "Access denied, missing token" });
+        res.status(401).json({ message: "Token not found." });
         return;
     }
     try {
@@ -20,7 +20,7 @@ const validateToken = (req, res, next) => {
         next();
     }
     catch (error) {
-        res.status(401).json({ message: "Access denied, missing token" });
+        res.status(401).json({ message: "Token faulty." });
         return;
     }
 };
