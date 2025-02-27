@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import '../styles/columncard.css'
 import { Button, Card, CardContent, CardHeader, IconButton, MenuItem, MenuList, TextField, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -14,18 +14,21 @@ interface ICard {
 }
 
 interface CardProps {
-    columnid: string
+    columnid: string,
+    columns: string[]
 }
 
-const ColumnCards: React.FC<CardProps> = ({columnid}) => {
+const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
     const [cards, setCards] = useState<ICard[]>([])
+
     
     const [menuid, setMenuid] = useState<string>("")
     const [renameid, setRenameid] = useState<string>("")
     const [editContent, setEditContent] = useState<string>("")
+    const [changeColor, setChangeColor] = useState<string>("")
 
-    const [cardName, setCardName] = useState<string>("")
-    const [cardContent, setCardContent] = useState<string>("")
+    const [cardName, setCardsName] = useState<string>("New card")
+    const [cardContent, setCardsContent] = useState<string>("This is a new card.")
 
     const [token, setToken] = useState<string | null>(null)
     
@@ -40,12 +43,14 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
     const toggleMenu = (cardid: string) => {
         if (menuid != "") {
             setMenuid("")
+            toggleChangeColor("")
         } else {
             setMenuid(cardid)
         }
     }
 
     const toggleRename = (cardid: string) => {
+        // Used when user wants to rename a card.
         if (renameid != "") {
             setRenameid("")
         } else {
@@ -54,6 +59,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
     }
 
     const toggleEditContent = (cardid: string) => {
+        // Used when user wants to edit the contents of a card.
         if (editContent != "") {
             setEditContent("")
         } else {
@@ -61,10 +67,18 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
         }
     }
 
-    // functions to access backend
+    const toggleChangeColor= (cardid: string) => {
+        if (changeColor != "") {
+            setChangeColor("")
+        } else {
+            setChangeColor(cardid)
+        }
+    }
+
+    // functions to communicate with backend
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:3000/cards/fetchdata', {
+            const response = await fetch('http://localhost:3000/cards/fetchcards', {
                 method: "POST",
                 headers: { 
                     "Content-type": "application/json",
@@ -112,7 +126,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
         }
     }
 
-    const deleteCard = async (cardid: string) => {
+    const deleteCards = async (cardid: string) => {
         try {
             const response = await fetch('http://localhost:3000/cards/delete', {
                 method: "DELETE",
@@ -126,6 +140,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
             if (!response.ok) {
                 throw new Error("Error while fetching data")
             }
+
             const data = await response.json()
             setCards(data.cards)
 
@@ -144,7 +159,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
                     "Content-type": "application/json",
                     "Authorization": "Bearer " + token
                 },
-                body: JSON.stringify({columnid: columnid, cardid: cardid, newtitle: cardName})
+                body: JSON.stringify({cardid: cardid, columnid: columnid, newtitle: cardName})
             })
 
             if (!response.ok) {
@@ -169,7 +184,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
                     "Content-type": "application/json",
                     "Authorization": "Bearer " + token
                 },
-                body: JSON.stringify({columnid: columnid, cardid: cardid, newcontent: cardContent})
+                body: JSON.stringify({cardid: cardid, columnid: columnid, newcontent: cardContent})
             })
 
             if (!response.ok) {
@@ -186,16 +201,15 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
         }
     }
 
-    // NOT YET DONE!!!
-    const changeColor = async (cardid: string) => {
+    const changeCardColor = async (cardid: string, newcolor: string) => {
         try {
-            const response = await fetch("http://localhost:3000/cards/color", {
+            const response = await fetch("http://localhost:3000/cards/updatecolor", {
                 method: "POST",
                 headers: { 
                     "Content-type": "application/json",
                     "Authorization": "Bearer " + token
                 },
-                body: JSON.stringify({"columnid": columnid})
+                body: JSON.stringify({cardid: cardid, columnid: columnid, newcolor: newcolor})
             })
 
             if (!response.ok) {
@@ -213,50 +227,92 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
     }
 
     return (
-        <div className='card-container' draggable onDragStart={() => {}}>
-            {cards.map((card) => (
-                <Card className='card' key={card['_id']} style={{backgroundColor: card['color']}}>
-
+        <>
+            {cards.map((card) => (<>
+                {!card ? (null):(<>
+                    <Card className='card' key={card['_id']} style={{backgroundColor: card.color}}>
                     {!(renameid===card['_id']) ? (<>
-                        <CardHeader
-                            action={
-                              <IconButton key={card['_id']} aria-label="settings" onClick={() => {toggleMenu(card['_id'])}}>
-                                  <MoreVertIcon />
-                              </IconButton>
-                            }
-                            title={card['title']}
+                        <CardHeader 
+                            onDoubleClick={() => setRenameid(card['_id'])}
+                            action={<>
+                                <IconButton key={card['_id']} aria-label="settings" onClick={() => {toggleMenu(card['_id'])}}>
+                                    <MoreVertIcon />
+                                </IconButton>
+                            </>}
+                            title={card.title}
                         />
                     </>):(<>
                         <TextField 
                             required 
-                            className="text-input" 
+                            className="text-input"
                             variant="standard"
-                            defaultValue={cardName}
-                            onChange={(e) => {setCardName(e.target.value)}}>
+                            placeholder='Title'
+                            defaultValue={card['title']}
+                            onChange={(e) => {setCardsName(e.target.value)}}>
                         </TextField>
                         <Button onClick={() => {toggleRename(card['_id']), renameCard(card['_id'])}}>Save</Button>
                         <Button onClick={() => {toggleRename(card['_id'])}}>Discard</Button>
                     </>)}
-                    
-                    {!(menuid===card['_id']) ? (<></>):(<>
+                    { // This is the menu
+                    !(menuid===card['_id']) ? (<></>):(<>
                         <MenuList key={card['_id']}>
-                            <MenuItem onClick={() => {toggleMenu(card['_id']), deleteCard(card['_id'])}}>Delete</MenuItem>
+                            <MenuItem onClick={() => {toggleMenu(card['_id']), deleteCards(card['_id'])}}>Delete</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleRename(card['_id'])}}>Rename</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleEditContent(card['_id'])}}>Edit content</MenuItem>
-                            <MenuItem onClick={() => {changeColor(card['_id'])}}>Change color</MenuItem>
+                            <MenuItem onClick={() => {toggleChangeColor(card['_id'])}}>Change color</MenuItem>
                         </MenuList>
                     </>)}
-
+                    { // This is the color change menu
+                    !(changeColor===card['_id']) ? (<></>):(<>
+                        <MenuList className="color-menu" key={card['_id']}>
+                            <MenuItem 
+                                onClick={() => {
+                                    toggleChangeColor(card['_id']), 
+                                    toggleMenu(card['_id']), 
+                                    changeCardColor(card['_id'], "#A9D2D5")}} 
+                                sx={{backgroundColor: "#A9D2D5"}}>Light blue
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={() => {
+                                    toggleChangeColor(card['_id']), 
+                                    toggleMenu(card['_id']), 
+                                    changeCardColor(card['_id'], "#DE9151")}} 
+                                sx={{backgroundColor: "#DE9151"}}>Persian orange
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={() => {
+                                    toggleChangeColor(card['_id']), 
+                                    toggleMenu(card['_id']), 
+                                    changeCardColor(card['_id'], "#519872")}} 
+                                sx={{backgroundColor: "#519872"}}>Sea green
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={() => {
+                                    toggleChangeColor(card['_id']), 
+                                    toggleMenu(card['_id']), 
+                                    changeCardColor(card['_id'], "#947EB0")}} 
+                                sx={{backgroundColor: "#947EB0"}}>African violet
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={() => {
+                                    toggleChangeColor(card['_id']), 
+                                    toggleMenu(card['_id']), 
+                                    changeCardColor(card['_id'], "#F8AD9D")}} 
+                                sx={{backgroundColor: "#F8AD9D"}}>Coral pink
+                            </MenuItem>
+                        </MenuList>
+                    </>)}
                     <CardContent>
                         {!(editContent===card['_id']) ? (<>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }} onDoubleClick={() => {toggleEditContent(card['_id'])}}>
                                 {card['content']}
                             </Typography>
                         </>):(<>
                             <TextField 
                                 id="outlined-multiline-static"
+                                placeholder='Edit content'
                                 variant='outlined'
-                                multiline onChange={(e) => {setCardContent(e.target.value)}} 
+                                multiline onChange={(e) => {setCardsContent(e.target.value)}} 
                                 defaultValue={card['content']}>
                             </TextField>
                             <Button onClick={() => {toggleEditContent(card['_id']), editCardContent(card['_id'])}}>Save</Button>
@@ -264,9 +320,10 @@ const ColumnCards: React.FC<CardProps> = ({columnid}) => {
                         </>)}
                     </CardContent>
                 </Card>
-            ))}
-            <Button onClick={() => {addCard()}}>Add new card</Button>
-        </div>
+            </>)}
+        </>))}
+        <Button onClick={() => {addCard()}}>Add new card</Button>
+    </>
     )
 }
 

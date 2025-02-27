@@ -27,15 +27,15 @@ const Header = () => {
         <header className="header">
             <AppBar className="app-bar">
                 <Toolbar>
-                    <h3 className="header-text">Very cool header</h3>
+                    <h3 className="header-text">Cool app</h3>
                     <Button className="header-button" variant="contained" href='/home'>Home</Button>
                     {!token ? 
-                    ( // NO token
+                    ( // NO authentication token
                         <>
                             <Button className="register" variant="contained" href='/register'>Register</Button>
                             <Button className="login" variant="contained" href='/login'>Log in</Button>
                         </>
-                    ):( // token FOUND
+                    ):( // Authentication token FOUND
                         <>
                             <Button className="header-button" variant="contained" href='/board'>Board</Button>
                             <Button className="logout" variant="contained" onClick={() => {logout()}}>Log out</Button>

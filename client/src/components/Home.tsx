@@ -1,5 +1,6 @@
 import Button from '@mui/material/Button'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import Profile from './Profile'
 
 const Home = () => {
     const [token, setToken] = useState<string | null>(null)
@@ -12,15 +13,17 @@ const Home = () => {
 
     return (
         <div>
-          <h1>Welcome to very cool app</h1>
+          <h1>Welcome to a very cool app</h1>
           {!token ? 
                 ( // NO token
                     <>
-                        <Button className="register" variant="contained" href='/register'>Stuff 1</Button>
+                        <p>This app is so cool that you probably cannot resist registering. Yeah. That has to be it. No need for marketing speeches here.</p>
+                        <Button className="register" variant="contained" href='/register'>Go register!</Button>
                     </>
                 ):( // token FOUND
                     <>
-                        <Button className="header-button" variant="contained" href='/board'>Styuff 2</Button>
+                        <Button className="header-button" variant="contained" href='/board'>Go edit your board!</Button>
+                        <Profile></Profile>
                     </>
                 )}
         </div>
