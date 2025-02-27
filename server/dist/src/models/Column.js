@@ -1,4 +1,8 @@
 "use strict";
+/*
+Sources:
+1. How to add an array to the mongodb schema: https://stackoverflow.com/questions/41013039/mongoose-schema-how-to-add-an-array
+*/
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -38,6 +42,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 let columnSchema = new mongoose_1.Schema({
     owner: { type: String, required: true },
     columnname: { type: String, required: true },
+    cards: [{ type: String, required: true, default: [] }],
     createdAt: { type: Date, required: true, default: new Date() }
 });
 const Column = mongoose_1.default.model("column", columnSchema);

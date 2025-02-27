@@ -5,18 +5,16 @@ interface ICard extends Document {
     title: string,
     content: string,
     color: string,
-    order: number,
-    boardId: string,
+    columnid: string,
     createdAt: Date,
     _id: ObjectId
 }
 
 let cardSchema: Schema = new Schema({
     title: {type: String, required: true},
-    content: {type: String, required: true},
-    color: {type: String, required: true},
-    comments: {type: String, required: false},
-    order: {type: Number, required: true},
+    content: {type: String, required: true, default: "This is a new card."},
+    color: {type: String, required: true, default: "#A9D2D5"},
+    columnid: {type: String, required: true},
     createdAt: {type: Date, required: true, default: new Date()},
 })
 

@@ -1,7 +1,8 @@
 import express, {Express} from "express"
 import path from "path"
 import userRouter from "./src/routes/user"
-import router from "./src/routes/index"
+import cardRouter from "./src/routes/cards"
+import columnRouter from "./src/routes/columns"
 import morgan from "morgan"
 import dotenv from "dotenv"
 import mongoose, {Connection} from "mongoose"
@@ -33,8 +34,9 @@ app.use(express.urlencoded({extended: false}))
 app.use(morgan("dev"))
 
 app.use(express.static(path.join(__dirname, "../public")))
-app.use("/", router)
+app.use("/", columnRouter)
 app.use("/", userRouter)
+app.use("/", cardRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)

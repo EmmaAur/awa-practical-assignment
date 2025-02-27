@@ -40,6 +40,7 @@ let userSchema = new mongoose_1.Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
     username: { type: String, required: true },
+    image: { type: String, required: false },
     columns: { type: Number, required: true, default: 0 }
 });
 const User = mongoose_1.default.model("User", userSchema);

@@ -37,6 +37,7 @@ exports.Comment = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 let CommentSchema = new mongoose_1.Schema({
     message: { type: String, required: true },
+    username: { type: String, required: true },
     cardId: { type: String, required: true },
     createdAt: { type: Date, required: true, default: new Date() }
 });
