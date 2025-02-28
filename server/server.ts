@@ -2,6 +2,7 @@ import express, {Express} from "express"
 import path from "path"
 import userRouter from "./src/routes/user"
 import cardRouter from "./src/routes/cards"
+import commentRouter from "./src/routes/comments"
 import columnRouter from "./src/routes/columns"
 import morgan from "morgan"
 import dotenv from "dotenv"
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, "../public")))
 app.use("/", columnRouter)
 app.use("/", userRouter)
 app.use("/", cardRouter)
+app.use("/", commentRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)

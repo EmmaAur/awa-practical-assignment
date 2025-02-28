@@ -11,7 +11,7 @@ const Card_1 = require("../models/Card");
 const validateToken_1 = require("../middleware/validateToken");
 const mongodb_1 = require("mongodb");
 const router = (0, express_1.Router)();
-router.post("/cards/fetchcards", validateToken_1.validateToken, async (req, res) => {
+router.post("/cards/fetchdata", validateToken_1.validateToken, async (req, res) => {
     /*
     req.body requires:
     { columnid: string }
@@ -43,6 +43,7 @@ router.post("/cards/add", validateToken_1.validateToken, async (req, res) => {
         // Add the new card to the database
         const card = new Card_1.Card({
             title: "New card",
+            owner: req.user?.username,
             columnid: req.body.columnid,
             order: order
         });
@@ -108,7 +109,8 @@ router.post("/cards/updatecolor", validateToken_1.validateToken, async (req, res
     { cardid: string, columnid: stirng, newcolor: string }
     */
     try {
-        await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { color: req.body.newcolor } });
+        const edited = new Date();
+        await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { color: req.body.newcolor, lastEdited: edited } });
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
         res.status(200).json({ cards: cards });
     }

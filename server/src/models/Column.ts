@@ -1,6 +1,7 @@
 import mongoose, {Document, Schema} from "mongoose"
 import {ObjectId} from "mongodb"
 
+const DATE_TIME_FORMAT = 'YYYY-MM-DDTHH:mm'
 
 interface IColumn extends Document {
     owner: string,

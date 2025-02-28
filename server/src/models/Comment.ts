@@ -2,16 +2,18 @@ import mongoose, {Document, Schema} from "mongoose"
 
 
 interface IComment extends Document {
-    message: string,
-    username: string,
+    content: string,
+    owner: string,
     cardId: string,
+    lastEdited: Date,
     createdAt: Date
 }
 
 let CommentSchema: Schema = new Schema({
-    message: {type: String, required: true},
-    username: {type: String, required: true},
+    content: {type: String, required: true},
+    owner: {type: String, required: true},
     cardId: {type: String, required: true},
+    lastEdited: {type: Date, required: true, default: new Date()},
     createdAt: {type: Date, required: true, default: new Date()}
 })
 

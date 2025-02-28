@@ -6,14 +6,13 @@ Sources:
 */
 
 import {Request, Response, Router} from "express"
-import {IColumn, Column} from "../models/Column"
 import {ICard, Card} from "../models/Card"
 import {validateToken, CustomRequest} from "../middleware/validateToken"
 import {ObjectId} from "mongodb"
 
 const router: Router = Router()
 
-router.post("/cards/fetchcards", validateToken, async (req: CustomRequest, res: Response) => {
+router.post("/cards/fetchdata", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
     { columnid: string }
@@ -47,6 +46,7 @@ router.post("/cards/add", validateToken, async (req: CustomRequest, res: Respons
         // Add the new card to the database
         const card: ICard = new Card({
             title: "New card",
+            owner: req.user?.username,
             columnid: req.body.columnid,
             order: order
         })
@@ -118,7 +118,8 @@ router.post("/cards/updatecolor", validateToken, async (req: CustomRequest, res:
     { cardid: string, columnid: stirng, newcolor: string }
     */
     try {
-        await Card.findOneAndUpdate({_id: new ObjectId(req.body.cardid)}, {$set: {color: req.body.newcolor}})
+        const edited: Date = new Date()
+        await Card.findOneAndUpdate({_id: new ObjectId(req.body.cardid)}, {$set: {color: req.body.newcolor, lastEdited: edited}})
 
         let cards: ICard[] = await Card.find({columnid: req.body.columnid})
         res.status(200).json({cards: cards})

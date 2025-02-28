@@ -1,5 +1,6 @@
 import {Request, Response, Router} from "express"
 import {IColumn, Column} from "../models/Column"
+import {ICard, Card} from "../models/Card"
 import {IUser, User} from "../models/User"
 import {validateToken, CustomRequest} from "../middleware/validateToken"
 import {ObjectId} from "mongodb"
@@ -59,9 +60,9 @@ router.delete("/columns/delete", validateToken, async (req: CustomRequest, res: 
     */
     try {
         await Column.deleteOne({_id: new ObjectId(req.body.columnid)})
+        await Card.deleteMany({columnid: req.body.columnid})
         const columns: IColumn[] | null = await Column.find({owner: req.user?.username})
         res.status(200).json({columns: columns})
-
     } catch (error: any) {
         console.log("Error while deleting a topic:", error)
         res.status(500).json({error: "Internal Server Error"})

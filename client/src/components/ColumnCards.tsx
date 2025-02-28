@@ -1,7 +1,12 @@
+/*
+Replace letter on array: https://stackoverflow.com/questions/39624581/javascript-replace-characters-of-an-element-in-an-array
+*/
+
 import React, { useEffect, useState } from 'react'
 import '../styles/columncard.css'
 import { Button, Card, CardContent, CardHeader, IconButton, MenuItem, MenuList, TextField, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import Comment from './Comment'
 
 interface ICard {
     title: string,
@@ -9,6 +14,7 @@ interface ICard {
     color: string,
     order: number,
     columnid: string,
+    lastEdited: Date,
     createdAt: Date,
     _id: string
 }
@@ -87,7 +93,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
     // functions to communicate with backend
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:3000/cards/fetchcards', {
+            const response = await fetch('http://localhost:3000/cards/fetchdata', {
                 method: "POST",
                 headers: { 
                     "Content-type": "application/json",
@@ -307,42 +313,49 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
                                     toggleChangeColor(card['_id']), 
                                     toggleMenu(card['_id']), 
                                     changeCardColor(card['_id'], "#A9D2D5")}} 
-                                sx={{backgroundColor: "#A9D2D5"}}>Light blue
+                                sx={{backgroundColor: "#A9D2D5"}}>Blue
                             </MenuItem>
                             <MenuItem 
                                 onClick={() => {
                                     toggleChangeColor(card['_id']), 
                                     toggleMenu(card['_id']), 
                                     changeCardColor(card['_id'], "#DE9151")}} 
-                                sx={{backgroundColor: "#DE9151"}}>Persian orange
+                                sx={{backgroundColor: "#DE9151"}}>Orange
                             </MenuItem>
                             <MenuItem 
                                 onClick={() => {
                                     toggleChangeColor(card['_id']), 
                                     toggleMenu(card['_id']), 
                                     changeCardColor(card['_id'], "#519872")}} 
-                                sx={{backgroundColor: "#519872"}}>Sea green
+                                sx={{backgroundColor: "#519872"}}>Green
                             </MenuItem>
                             <MenuItem 
                                 onClick={() => {
                                     toggleChangeColor(card['_id']), 
                                     toggleMenu(card['_id']), 
                                     changeCardColor(card['_id'], "#947EB0")}} 
-                                sx={{backgroundColor: "#947EB0"}}>African violet
+                                sx={{backgroundColor: "#947EB0"}}>Purple
                             </MenuItem>
                             <MenuItem 
                                 onClick={() => {
                                     toggleChangeColor(card['_id']), 
                                     toggleMenu(card['_id']), 
                                     changeCardColor(card['_id'], "#F8AD9D")}} 
-                                sx={{backgroundColor: "#F8AD9D"}}>Coral pink
+                                sx={{backgroundColor: "#F8AD9D"}}>Pink
                             </MenuItem>
                         </MenuList>
                     </>)}
                     <CardContent>
                         {!(editContent===card['_id']) ? (<>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }} onDoubleClick={() => {toggleEditContent(card['_id'])}}>
+                            <Typography variant="body1" sx={{ color: 'text.primary' }} onDoubleClick={() => {toggleEditContent(card['_id'])}}>
                                 {card['content']}
+                            </Typography>
+
+                            <Comment cardid={card['_id']}></Comment>
+
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                <sub>Created at: {card['createdAt'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub><br/>
+                                <sub>Last edited: {card['lastEdited'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub>
                             </Typography>
                         </>):(<>
                             <TextField 

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Column_1 = require("../models/Column");
+const Card_1 = require("../models/Card");
 const User_1 = require("../models/User");
 const validateToken_1 = require("../middleware/validateToken");
 const mongodb_1 = require("mongodb");
@@ -48,6 +49,7 @@ router.delete("/columns/delete", validateToken_1.validateToken, async (req, res)
     */
     try {
         await Column_1.Column.deleteOne({ _id: new mongodb_1.ObjectId(req.body.columnid) });
+        await Card_1.Card.deleteMany({ columnid: req.body.columnid });
         const columns = await Column_1.Column.find({ owner: req.user?.username });
         res.status(200).json({ columns: columns });
     }

@@ -5,7 +5,7 @@ Sources:
 */
 
 import { useEffect, useState } from "react"
-import { Avatar, Button, Card, CardHeader, Grid2, IconButton, MenuItem, MenuList, TextField } from '@mui/material'
+import { Avatar, Button, Card, CardHeader, Container, Grid2, IconButton, MenuItem, MenuList, TextField } from '@mui/material'
 import '../styles/board.css'
 import ColumnCards from "./ColumnCards";
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -21,6 +21,7 @@ interface IColumn {
 const Board = () => {
     const [columns, setColumns] = useState<IColumn[]>([]) // For fetching column data
     const [columnsOrder, setColumnsOrder] = useState<string[]>([])
+    const [clickedColumn, setClickedColumn] = useState<string>("")
 
     const [menuid, setMenuid] = useState<string>("") // For toggling menu visible / not visible
     const [renameid, setRenameid] = useState<string>("") // for toggling rename field visible / not visible
@@ -71,7 +72,6 @@ const Board = () => {
                 lista.push(column._id)
             });
             setColumnsOrder(lista)
-
             setColumns(data.columns)
 
         } catch (error) {
@@ -156,7 +156,7 @@ const Board = () => {
     }
 
     return (
-        <>
+        <Container>
             <div>
                 <Button variant="outlined" onClick={() => addColumn()}>Add new column</Button>
             </div>
@@ -169,12 +169,12 @@ const Board = () => {
                 
                 {columns.map((column) => (
                     <Card
-                    id={column['_id']}
-                    variant="outlined"
-                    className="grid-item"
-                    sx={{ width: 250, maxWidth: 1, height: "100%"}}
-                    key={column['_id']}
-                    > 
+                        id={column['_id']}
+                        variant="outlined"
+                        className="grid-item"
+                        sx={{ width: 250, maxWidth: 1, height: "100%"}}
+                        key={column['_id']}
+                    >
                     {!(renameid===column['_id']) ? (<>
                         <CardHeader
                             onDoubleClick={() => {toggleRename(column['_id'])}}
@@ -189,7 +189,7 @@ const Board = () => {
                                 </IconButton>
                             }
                             title={column['columnname']}
-                            subheader={column['owner']}
+                            subheader={column['createdAt'].toString().split("T")[0]}
                         />
                         </>):(<>
                             <TextField 
@@ -197,6 +197,7 @@ const Board = () => {
                                 className="text-input"
                                 variant="standard"
                                 placeholder='Column name'
+                                defaultValue={column['columnname']}
                                 onChange={(e) => {setColumnName(e.target.value)}}>
                             </TextField>
                             <Button onClick={() => {toggleRename(column['_id']), renameColumn(column['_id'])}}>Save</Button>
@@ -214,7 +215,7 @@ const Board = () => {
                     </Card>
                 ))}
             </Grid2>
-        </>
+        </Container>
     );
 };
 export default Board

@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const user_1 = __importDefault(require("./src/routes/user"));
 const cards_1 = __importDefault(require("./src/routes/cards"));
+const comments_1 = __importDefault(require("./src/routes/comments"));
 const columns_1 = __importDefault(require("./src/routes/columns"));
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -33,6 +34,7 @@ app.use(express_1.default.static(path_1.default.join(__dirname, "../public")));
 app.use("/", columns_1.default);
 app.use("/", user_1.default);
 app.use("/", cards_1.default);
+app.use("/", comments_1.default);
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
