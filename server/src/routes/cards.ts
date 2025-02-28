@@ -1,6 +1,8 @@
 /*
 Sources:
 1. Remove item of an array based on its index: https://sentry.io/answers/remove-specific-item-from-array/
+2. Sort an array of objects: https://stackoverflow.com/questions/43311121/sort-an-array-of-objects-in-typescript
+3. Using splice: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
 */
 
 import {Request, Response, Router} from "express"
@@ -14,12 +16,13 @@ const router: Router = Router()
 router.post("/cards/fetchcards", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
-    { cardid: string, columnid: string }
+    { columnid: string }
     */
     try {
+        // fetch the cards and send them back
         let cards: ICard[] | null = await Card.find({columnid: req.body.columnid})
         if (!cards) {
-            res.status(403).json({error: "Card not found."})
+            res.status(500).json({error: "Card not found."})
             return
         }
         res.status(200).json({cards: cards})
@@ -31,36 +34,27 @@ router.post("/cards/fetchcards", validateToken, async (req: CustomRequest, res: 
     }
 })
 
-
 router.post("/cards/add", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
     { columnid: string }
     */
     try {
-        // Add the new card to the cards database
+        // find old cards to give the new card an order number
+        const oldCards: ICard[] = await Card.find({columnid: req.body.columnid})
+        const order = oldCards.length
+
+        // Add the new card to the database
         const card: ICard = new Card({
             title: "New card",
-            columnid: req.body.columnid
+            columnid: req.body.columnid,
+            order: order
         })
         await card.save()
 
-        // Update the new cards id to the 
-        const column: IColumn | null = await Column.findOne({_id: new ObjectId(req.body.columnid)})
-        let updatedCards: string[] | undefined = column?.cards
-        
-
-        let newCardId = card._id.toString()
-
-        updatedCards?.push(newCardId)
-
-        await Column.findOneAndUpdate(
-            {_id:  new ObjectId(req.body.columnid)}, 
-            {$set: {cards: updatedCards }}
-        )
-
-        // Send back the updated columns
+        // Send back the updated cards
         const cards: ICard[] = await Card.find({columnid: req.body.columnid})
+        console.log("In /cards/add", cards)
         res.status(200).json({cards: cards})
 
     } catch (error: any) {
@@ -69,32 +63,23 @@ router.post("/cards/add", validateToken, async (req: CustomRequest, res: Respons
     }
 })
 
-
 router.delete("/cards/delete", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
     { cardid: string, columnid: string }
     */
-    console.log("Card to delete: ", req.body.cardid)
     try {
-        const column: IColumn | null = await Column.findOne({_id: new ObjectId(req.body.columnid)})
-        if (!column) {
-            res.status(500).json({error: "Column not found"})
-            return
-        }
-        let cardIndex = column.cards.indexOf(req.body.cardid)
-        const newColumnCards = column.cards.splice(cardIndex, 1)
-        console.log("newColumnCards in /cards/delete: ", newColumnCards)
-        
-        await Column.findOneAndUpdate(
-            {_id:  new ObjectId(req.body.columnid)}, 
-            {$set: {cards: newColumnCards}}
-        )
- 
+        // Delete the card matching the id in the request body
         await Card.deleteOne({_id: new ObjectId(req.body.cardid)})
+        let cards: ICard[] | null = await Card.find({columnid: req.body.columnid})
+        const reorderedCards: ICard[] = reorderCards(cards) // This code was got from source 2
 
-        const cards: ICard[] | null = await Card.find({columnid: req.body.columnid})
-        res.status(200).json({cards: cards})
+        // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+        await Card.deleteMany({ columnid: req.body.columnid })
+        await Card.insertMany(reorderedCards)
+
+        // Send back the reordered cards
+        res.status(200).json({cards: reorderedCards})
 
     } catch (error: any) {
         console.log("Error while deleting a topic:", error)
@@ -144,27 +129,47 @@ router.post("/cards/updatecolor", validateToken, async (req: CustomRequest, res:
     }
 })
 
-// NOT DONE YET
-router.get("/cards/reorder", validateToken, async (req: CustomRequest, res: Response) => {
+
+router.post("/cards/reorder", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
-    { cardid: string, neworder: number }
+    { card: ICard, neworder: number, columnid: string }
     */
     try {
-        let cards: ICard[] = await Card.find({owner: req.user?.username})
-        let orderedCards: ICard[] = []
+        // remove the card from its old index
+        const cards: ICard[] | null = await Card.find({columnid: req.body.columnid})
+        let currentIndex = req.body.card.order
 
-        cards.forEach(card => {
-            let prevcard: ICard = card
-        })
-        // HERE EDIT THE NEW  CARDS ORDER
+        cards.splice(currentIndex, 1)
+        console.log("\nin /cards/reorder, when card removed:", cards)
 
-        // cards.forEach(card => {
-        //     if (card.order > req.body.neworder) {
-        //         // EDIT CARD ORDER +1
-        //     }
-        // });
-        res.status(200).json({cards: cards})
+        // Add the card on it's desired index and reset the order attributes of the cards using reorderCards
+        cards.splice(req.body.neworder, 0, req.body.card)
+        console.log("\nin /cards/reorder, when card added back:", cards)
+        const reorderedCards: ICard[] = reorderCards(cards)
+        console.log("\nAfter reorder", reorderedCards)
+
+        // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+        await Card.deleteMany({ columnid: req.body.columnid })
+
+
+        // Add the new card to the database
+        const newCards: ICard[] = []
+        reorderedCards.forEach(card => {
+            const carddata: ICard = new Card({
+                title: card.title,
+                content: card.content,
+                color: card.color,
+                columnid: card.columnid,
+                order: card.order,
+                createdAt: card.createdAt,
+            })
+            newCards.push(carddata)
+        });
+        await Card.insertMany(newCards)
+        console.log("\nnewCards:", newCards)
+        // Send back the reordered cards
+        res.status(200).json({cards: newCards})
 
     } catch (error: any) { 
         console.log("Error while fecthing data:", error)
@@ -172,6 +177,13 @@ router.get("/cards/reorder", validateToken, async (req: CustomRequest, res: Resp
     }
 })
 
-
+const reorderCards = (cards: ICard[]) => {
+    let order = 0
+    cards.forEach(card => {
+        card.order = order
+        order += 1
+    });
+    return cards
+}
 
 export default router

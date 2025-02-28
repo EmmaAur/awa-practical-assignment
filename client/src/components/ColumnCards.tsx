@@ -21,11 +21,12 @@ interface CardProps {
 const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
     const [cards, setCards] = useState<ICard[]>([])
 
-    
     const [menuid, setMenuid] = useState<string>("")
     const [renameid, setRenameid] = useState<string>("")
     const [editContent, setEditContent] = useState<string>("")
     const [changeColor, setChangeColor] = useState<string>("")
+
+    const [reorderCard, setReorderCard] = useState<ICard | null>(null)
 
     const [cardName, setCardsName] = useState<string>("New card")
     const [cardContent, setCardsContent] = useState<string>("This is a new card.")
@@ -75,6 +76,14 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    const toggleReorder= (card: ICard) => {
+        if (reorderCard != null) {
+            setReorderCard(null)
+        } else {
+            setReorderCard(card)
+        }
+    }
+
     // functions to communicate with backend
     const fetchData = async () => {
         try {
@@ -101,7 +110,7 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
         
     }
 
-    const addCard = async () => {
+    const addCards = async () => {
         try {
             const response = await fetch("http://localhost:3000/cards/add", {
                 method: "POST",
@@ -226,11 +235,38 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    const reorderCards = async (card: ICard, newOrder: number) => {
+        toggleReorder(card)
+        try {
+            const response = await fetch("http://localhost:3000/cards/reorder", {
+                method: "POST",
+                headers: { 
+                    "Content-type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ card: card, neworder: newOrder, columnid: columnid })
+            })
+
+            if (!response.ok) {
+                throw new Error("Error while fetching data")
+            }
+            
+            const data = await response.json()
+            setCards(data.cards)
+
+        } catch (error) {
+            if (error instanceof Error) {
+                console.log("Error fetching data:", error.message)
+            }
+        }
+    }
+
+
+
     return (
         <>
             {cards.map((card) => (<>
-                {!card ? (null):(<>
-                    <Card className='card' key={card['_id']} style={{backgroundColor: card.color}}>
+                <Card className='card' key={card['_id']} style={{backgroundColor: card.color}} onClick={() => {reorderCard && reorderCards(reorderCard, card.order)}}>
                     {!(renameid===card['_id']) ? (<>
                         <CardHeader 
                             onDoubleClick={() => setRenameid(card['_id'])}
@@ -253,16 +289,17 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
                         <Button onClick={() => {toggleRename(card['_id']), renameCard(card['_id'])}}>Save</Button>
                         <Button onClick={() => {toggleRename(card['_id'])}}>Discard</Button>
                     </>)}
-                    { // This is the menu
+                    { // Card menu
                     !(menuid===card['_id']) ? (<></>):(<>
                         <MenuList key={card['_id']}>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), deleteCards(card['_id'])}}>Delete</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleRename(card['_id'])}}>Rename</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleEditContent(card['_id'])}}>Edit content</MenuItem>
+                            <MenuItem onClick={() => {toggleMenu(card['_id']), toggleReorder(card)}}>Reorder</MenuItem>
                             <MenuItem onClick={() => {toggleChangeColor(card['_id'])}}>Change color</MenuItem>
                         </MenuList>
                     </>)}
-                    { // This is the color change menu
+                    { // Color change menu
                     !(changeColor===card['_id']) ? (<></>):(<>
                         <MenuList className="color-menu" key={card['_id']}>
                             <MenuItem 
@@ -320,9 +357,8 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
                         </>)}
                     </CardContent>
                 </Card>
-            </>)}
-        </>))}
-        <Button onClick={() => {addCard()}}>Add new card</Button>
+            </>))}
+        <Button onClick={() => {addCards()}}>Add new card</Button>
     </>
     )
 }

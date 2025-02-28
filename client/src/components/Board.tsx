@@ -169,6 +169,7 @@ const Board = () => {
                 
                 {columns.map((column) => (
                     <Card
+                    id={column['_id']}
                     variant="outlined"
                     className="grid-item"
                     sx={{ width: 250, maxWidth: 1, height: "100%"}}
@@ -176,6 +177,7 @@ const Board = () => {
                     > 
                     {!(renameid===column['_id']) ? (<>
                         <CardHeader
+                            onDoubleClick={() => {toggleRename(column['_id'])}}
                             avatar={
                                 <Avatar sx={{ bgcolor: "black" }}>
                                     {column['owner'][0] /* set username's first letter as avatar */}

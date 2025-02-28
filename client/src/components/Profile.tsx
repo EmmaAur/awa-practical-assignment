@@ -1,8 +1,11 @@
 import { Button, Card } from '@mui/material'
 import { useState } from 'react'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import {DragEndEvent} from '@dnd-kit/core'
 
 const Profile = () => {
+
+
     return (
         <div>
             <Card>
