@@ -7,7 +7,7 @@ Sources:
 import { useEffect, useState } from "react"
 import { Avatar, Button, Card, CardHeader, Container, Grid2, IconButton, MenuItem, MenuList, TextField } from '@mui/material'
 import '../styles/board.css'
-import ColumnCards from "./ColumnCards";
+import Cards from "./Cards";
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 interface IColumn {
@@ -211,7 +211,7 @@ const Board = () => {
                             </MenuList>
                         </>)}
                         
-                        <ColumnCards columnid={column['_id']} columns={columnsOrder}></ColumnCards>
+                        <Cards columnid={column['_id']} columns={columnsOrder}></Cards>
                     </Card>
                 ))}
             </Grid2>

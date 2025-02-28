@@ -51,5 +51,23 @@ router.post("/comments/add", validateToken, async (req: CustomRequest, res: Resp
     }
 })
 
+router.delete("/comments/delete", validateToken, async (req: CustomRequest, res: Response) => {
+    /*
+    req.body requires:
+    { commentid: string }
+    */
+    try {
+        // Delete the comment
+        await Comment.deleteOne({cardid: req.body.cardid})
+
+        // Send the remaining comments back to the frontend
+        const comments: IComment[] | null = await Comment.find({owner: req.user?.username})
+        res.status(200).json({comments: comments})
+    } catch (error: any) {
+        console.log("Error while deleting a topic:", error)
+        res.status(500).json({error: "Internal Server Error"})
+    }
+})
+
 
 export default router

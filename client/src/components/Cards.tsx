@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import '../styles/columncard.css'
 import { Button, Card, CardContent, CardHeader, IconButton, MenuItem, MenuList, TextField, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import Comment from './Comment'
+import Comments from './Comments'
 
 interface ICard {
     title: string,
@@ -24,7 +24,7 @@ interface CardProps {
     columns: string[]
 }
 
-const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
+const Cards: React.FC<CardProps> = ({columnid, columns}) => {
     const [cards, setCards] = useState<ICard[]>([])
 
     const [menuid, setMenuid] = useState<string>("")
@@ -268,7 +268,6 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
     }
 
 
-
     return (
         <>
             {cards.map((card) => (<>
@@ -283,7 +282,8 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
                             </>}
                             title={card.title}
                         />
-                    </>):(<>
+                    </>):
+                    (<>
                         <TextField 
                             required 
                             className="text-input"
@@ -351,13 +351,14 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
                                 {card['content']}
                             </Typography>
 
-                            <Comment cardid={card['_id']}></Comment>
-
+                            <Comments cardid={card['_id']}></Comments>
+                            
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                 <sub>Created at: {card['createdAt'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub><br/>
                                 <sub>Last edited: {card['lastEdited'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub>
                             </Typography>
-                        </>):(<>
+                        </>):
+                        (<>
                             <TextField 
                                 id="outlined-multiline-static"
                                 placeholder='Edit content'
@@ -376,5 +377,5 @@ const ColumnCards: React.FC<CardProps> = ({columnid, columns}) => {
     )
 }
 
-export default ColumnCards
+export default Cards
 

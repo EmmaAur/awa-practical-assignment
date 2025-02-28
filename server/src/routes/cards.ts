@@ -7,6 +7,7 @@ Sources:
 
 import {Request, Response, Router} from "express"
 import {ICard, Card} from "../models/Card"
+import {IComment, Comment} from "../models/Comment"
 import {validateToken, CustomRequest} from "../middleware/validateToken"
 import {ObjectId} from "mongodb"
 
@@ -66,15 +67,18 @@ router.post("/cards/add", validateToken, async (req: CustomRequest, res: Respons
 router.delete("/cards/delete", validateToken, async (req: CustomRequest, res: Response) => {
     /*
     req.body requires:
-    { cardid: string, columnid: string }
+    { columnid: string, cardid: string }
     */
     try {
-        // Delete the card matching the id in the request body
+        // Delete the card matching the id in the request body as well as any comment attached to it
         await Card.deleteOne({_id: new ObjectId(req.body.cardid)})
+        await Comment.deleteMany({cardid: req.body.cardid})
+
+        // Reset the cards' order
         let cards: ICard[] | null = await Card.find({columnid: req.body.columnid})
         const reorderedCards: ICard[] = reorderCards(cards) // This code was got from source 2
 
-        // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+        // In order to reorder the cards in the database, we delete the previous cards and then insert the newly ordered list of cards
         await Card.deleteMany({ columnid: req.body.columnid })
         await Card.insertMany(reorderedCards)
 

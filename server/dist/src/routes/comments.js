@@ -46,4 +46,21 @@ router.post("/comments/add", validateToken_1.validateToken, async (req, res) => 
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.delete("/comments/delete", validateToken_1.validateToken, async (req, res) => {
+    /*
+    req.body requires:
+    { commentid: string }
+    */
+    try {
+        // Delete the comment
+        await Comment_1.Comment.deleteOne({ cardid: req.body.cardid });
+        // Send the remaining comments back to the frontend
+        const comments = await Comment_1.Comment.find({ owner: req.user?.username });
+        res.status(200).json({ comments: comments });
+    }
+    catch (error) {
+        console.log("Error while deleting a topic:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 exports.default = router;

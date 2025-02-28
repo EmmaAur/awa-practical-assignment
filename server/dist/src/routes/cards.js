@@ -8,6 +8,7 @@ Sources:
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Card_1 = require("../models/Card");
+const Comment_1 = require("../models/Comment");
 const validateToken_1 = require("../middleware/validateToken");
 const mongodb_1 = require("mongodb");
 const router = (0, express_1.Router)();
@@ -61,14 +62,16 @@ router.post("/cards/add", validateToken_1.validateToken, async (req, res) => {
 router.delete("/cards/delete", validateToken_1.validateToken, async (req, res) => {
     /*
     req.body requires:
-    { cardid: string, columnid: string }
+    { columnid: string, cardid: string }
     */
     try {
-        // Delete the card matching the id in the request body
+        // Delete the card matching the id in the request body as well as any comment attached to it
         await Card_1.Card.deleteOne({ _id: new mongodb_1.ObjectId(req.body.cardid) });
+        await Comment_1.Comment.deleteMany({ cardid: req.body.cardid });
+        // Reset the cards' order
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
         const reorderedCards = reorderCards(cards); // This code was got from source 2
-        // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+        // In order to reorder the cards in the database, we delete the previous cards and then insert the newly ordered list of cards
         await Card_1.Card.deleteMany({ columnid: req.body.columnid });
         await Card_1.Card.insertMany(reorderedCards);
         // Send back the reordered cards
