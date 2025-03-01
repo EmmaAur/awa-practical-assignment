@@ -1,7 +1,7 @@
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import '../styles/login.css'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 
 
@@ -9,6 +9,8 @@ const Login = () => {
     const [password, setPassword] = useState<string>('')
     const [email, setemail] = useState<string>('')
     
+    // Sends login data to backend and if data is valid and user is found, 
+    // sends user the jwt token and redirects them to /board.
     const fetchData = async (password: string, email: string) => {
         const formData = {
             "password": password,
@@ -31,7 +33,7 @@ const Login = () => {
             
             if (data.token) {
                 localStorage.setItem("token", data.token)
-                window.location.href = '/home'
+                window.location.href = '/board'
             }
 
         } catch (error) {

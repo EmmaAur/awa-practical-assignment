@@ -5,7 +5,7 @@ Sources:
 */
 
 import { useEffect, useState } from "react"
-import { Avatar, Button, Card, CardHeader, Container, Grid2, IconButton, MenuItem, MenuList, TextField } from '@mui/material'
+import { Avatar, Button, Card, CardHeader, Container, Grid2, IconButton, MenuItem, MenuList, TextField, Typography } from '@mui/material'
 import '../styles/board.css'
 import Cards from "./Cards";
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -19,15 +19,13 @@ interface IColumn {
 }
 
 const Board = () => {
-    const [columns, setColumns] = useState<IColumn[]>([]) // For fetching column data
-    const [columnsOrder, setColumnsOrder] = useState<string[]>([])
-    const [clickedColumn, setClickedColumn] = useState<string>("")
+    const [columns, setColumns] = useState<IColumn[]>([])       // For updating column data
+    const [menuid, setMenuid] = useState<string>("")            // For toggling menu visible / not visible
+    const [renameid, setRenameid] = useState<string>("")        // For toggling rename field visible / not visible
+    const [columnName, setColumnName] = useState<string>("")    // Used for userinput when editing column name
+    const [token, setToken] = useState<string | null>(null)     // Used to get the jwt from browser storage
 
-    const [menuid, setMenuid] = useState<string>("") // For toggling menu visible / not visible
-    const [renameid, setRenameid] = useState<string>("") // for toggling rename field visible / not visible
-    const [columnName, setColumnName] = useState<string>("")
-    const [token, setToken] = useState<string | null>(null)
-
+    // Getting jwt from browser storage
     useEffect(() => {
         if (localStorage.getItem("token")) {
             setToken(localStorage.getItem("token"))
@@ -35,6 +33,7 @@ const Board = () => {
         }
     }, [token])
 
+    // Toggle tools to hide/show components based on matching id's
     const toggleMenu = (cardid: string) => {
         if (menuid != "") {
             setMenuid("")
@@ -42,7 +41,6 @@ const Board = () => {
             setMenuid(cardid)
         }
     }
-
     const toggleRename = (cardid: string) => {
         // Used when user wants to rename a card.
         if (renameid != "") {
@@ -51,7 +49,9 @@ const Board = () => {
             setRenameid(cardid)
         }
     }
+    // Toggle tools end
 
+    // Fetches columns and updates columns usestate.
     const fetchData = async () => {
         try {
             const response = await fetch('http://localhost:3000/columns/fetchdata', {
@@ -66,12 +66,6 @@ const Board = () => {
                 throw new Error("Error while fetching data")
             }
             const data = await response.json()
-
-            const lista: string[] = []
-            data.columns.forEach((column: { _id: string; }) => {
-                lista.push(column._id)
-            });
-            setColumnsOrder(lista)
             setColumns(data.columns)
 
         } catch (error) {
@@ -82,6 +76,7 @@ const Board = () => {
         
     }
 
+    // Sends nothing to backend, receives the updated list of columns and updates columns usestate.
     const addColumn = async () => {
         try {
             const response = await fetch("http://localhost:3000/columns/add", {
@@ -106,6 +101,8 @@ const Board = () => {
         }
     }
 
+    // Sends the column id to backend and deletes it from the database.
+    // Receives the updated list of columns and updates columns usestate.
     const deleteColumn = async (columnid: string) => {
         try {
             const response = await fetch("http://localhost:3000/columns/delete", {
@@ -130,6 +127,8 @@ const Board = () => {
         }
     }
 
+    // Sends columnid and the new column name to backend.
+    // Receives the updated list of columns and updates columns usestate.
     const renameColumn = async (columnid: string) => {
         try {
             const response = await fetch('http://localhost:3000/columns/rename', {
@@ -158,14 +157,17 @@ const Board = () => {
     return (
         <Container>
             <div>
-                <Button variant="outlined" onClick={() => addColumn()}>Add new column</Button>
+                <Button variant="outlined" onClick={() => addColumn()} style={{marginTop: 20}}>Add new column</Button>
+                <Typography></Typography>
             </div>
 
             <Grid2 
                 container
                 direction="row" 
                 rowSpacing={1}
-                className="grid-container">
+                className="grid-container"
+                onDrop={() => {fetchData()}}
+                >
                 
                 {columns.map((column) => (
                     <Card
@@ -174,24 +176,27 @@ const Board = () => {
                         className="grid-item"
                         sx={{ width: 250, maxWidth: 1, height: "100%"}}
                         key={column['_id']}
+
                     >
-                    {!(renameid===column['_id']) ? (<>
-                        <CardHeader
-                            onDoubleClick={() => {toggleRename(column['_id'])}}
-                            avatar={
-                                <Avatar sx={{ bgcolor: "black" }}>
-                                    {column['owner'][0] /* set username's first letter as avatar */}
-                                </Avatar>
-                            }
-                            action={
-                                <IconButton aria-label="settings" onClick={() => {toggleMenu(column['_id'])}}>
-                                    <MoreVertIcon />
-                                </IconButton>
-                            }
-                            title={column['columnname']}
-                            subheader={column['createdAt'].toString().split("T")[0]}
-                        />
-                        </>):(<>
+                    {!(renameid===column['_id']) ? ( // Shows card header or a text field for renaming the column
+                        <>
+                            <CardHeader
+                                onDoubleClick={() => {toggleRename(column['_id'])}}
+                                avatar={
+                                    <Avatar sx={{ bgcolor: "black" }}>
+                                        {column['owner'][0] /* set username's first letter as avatar */}
+                                    </Avatar>
+                                }
+                                action={
+                                    <IconButton aria-label="settings" onClick={() => {toggleMenu(column['_id'])}}>
+                                        <MoreVertIcon />
+                                    </IconButton>
+                                }
+                                title={column['columnname']}
+                                subheader={column['createdAt'].toString().split("T")[0]}
+                            />
+                        </>):(
+                        <>
                             <TextField 
                                 required 
                                 className="text-input"
@@ -204,14 +209,15 @@ const Board = () => {
                             <Button onClick={() => {toggleRename(column['_id'])}}>Discard</Button>
                         </>)}
 
-                        {!(menuid===column['_id']) ? (<></>):(<>
+                        {!(menuid===column['_id']) ? (<></>):( // Show either nothing or the column menu
+                        <>
                             <MenuList>
                                 <MenuItem onClick={() => {toggleMenu(column['_id']), deleteColumn(column['_id'])}}>Delete</MenuItem>
                                 <MenuItem onClick={() => {toggleMenu(column['_id']), toggleRename(column['_id'])}}>Rename</MenuItem>
                             </MenuList>
                         </>)}
                         
-                        <Cards columnid={column['_id']} columns={columnsOrder}></Cards>
+                        <Cards columnid={column['_id']}></Cards>
                     </Card>
                 ))}
             </Grid2>

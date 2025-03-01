@@ -11,12 +11,14 @@ import { AppBar, Button, Toolbar } from "@mui/material"
 const Header = () => {
     const [token, setToken] = useState<string | null>(null)
 
+    // get the jwt token to check which buttons to show the user
     useEffect(() => {
         if (localStorage.getItem("token")) {
             setToken(localStorage.getItem("token"))
         }
     }, [token])
 
+    // removes jwt token from browser memory and redirects user to /login
     const logout = () => {
         localStorage.removeItem("token")
         setToken(null)
@@ -28,7 +30,6 @@ const Header = () => {
             <AppBar className="app-bar">
                 <Toolbar>
                     <h3 className="header-text">Cool app</h3>
-                    <Button className="header-button" variant="contained" href='/home'>Home</Button>
                     {!token ? 
                     ( // NO authentication token
                         <>
@@ -44,7 +45,10 @@ const Header = () => {
                     
                 </Toolbar>
             </AppBar>
-            <Toolbar/>
+            <div>
+                <Toolbar/>
+            </div>
+            
         </header>
     )
 }

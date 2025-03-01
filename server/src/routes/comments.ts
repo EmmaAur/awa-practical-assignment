@@ -17,6 +17,8 @@ router.post("/comments/fetchdata", validateToken, async (req: CustomRequest, res
             res.status(500).json({error: "No comments not found."})
             return
         }
+
+        // Send comments to frontend
         res.status(200).json({comments: comments})
         return
 
@@ -58,11 +60,12 @@ router.delete("/comments/delete", validateToken, async (req: CustomRequest, res:
     */
     try {
         // Delete the comment
-        await Comment.deleteOne({cardid: req.body.cardid})
+        await Comment.deleteOne({_id: new ObjectId(req.body.commentid)})
 
         // Send the remaining comments back to the frontend
         const comments: IComment[] | null = await Comment.find({owner: req.user?.username})
         res.status(200).json({comments: comments})
+
     } catch (error: any) {
         console.log("Error while deleting a topic:", error)
         res.status(500).json({error: "Internal Server Error"})

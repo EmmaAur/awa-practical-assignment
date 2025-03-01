@@ -10,17 +10,19 @@ const Register = () => {
     const [username, setUsername] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     
+    // Sends register data to backend and if data is valid, redirects the user to log in page
     const fetchData = async (username: string, password: string, email: string) => {
         const formData = {
             "password": password,
             "username": username,
             "email": email
         }
-
         try {
             const response = await fetch('http://localhost:3000/user/register',{
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(formData)
             })
 
@@ -37,7 +39,6 @@ const Register = () => {
                 console.log("Error when trying to register")
             }
         }
-
     }
 
     return (

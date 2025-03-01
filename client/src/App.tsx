@@ -1,7 +1,6 @@
 import './App.css'
 import Board from './components/Board'
 import Header from './components/Header'
-import Home from './components/Home'
 import Register from './components/Register'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Login from './components/Login'
@@ -14,11 +13,6 @@ function App() {
       <Header></Header>
       <BrowserRouter>
         <Routes>
-
-          <Route path='/home' element= {<>
-            <Home></Home>
-          </>} />
-          
           <Route path='/board' element= {<>
             <Board></Board>
           </>} />

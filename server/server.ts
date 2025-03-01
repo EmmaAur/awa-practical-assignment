@@ -14,7 +14,7 @@ dotenv.config()
 const app: Express = express()
 const port: number = parseInt(process.env.PORT as string) || 3000
 
-
+// Initialize the mongodb connection
 const mongoDB: string = "mongodb://127.0.0.1:27017/projectwork"
 mongoose.connect(mongoDB)
 mongoose.Promise = Promise
@@ -28,12 +28,11 @@ const corsOptions: CorsOptions = {
     optionsSuccessStatus: 200,
 }
 app.use(cors(corsOptions))
-
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
-
 app.use(morgan("dev"))
 
+// Define the router paths
 app.use(express.static(path.join(__dirname, "../public")))
 app.use("/", columnRouter)
 app.use("/", userRouter)

@@ -1,5 +1,7 @@
 /*
-Replace letter on array: https://stackoverflow.com/questions/39624581/javascript-replace-characters-of-an-element-in-an-array
+Sources
+1. Replace letter on array: https://stackoverflow.com/questions/39624581/javascript-replace-characters-of-an-element-in-an-array
+2. Card drag and drop: https://www.youtube.com/watch?v=u65Y-vqYNAk
 */
 
 import React, { useEffect, useState } from 'react'
@@ -20,25 +22,22 @@ interface ICard {
 }
 
 interface CardProps {
-    columnid: string,
-    columns: string[]
+    columnid: string
 }
 
-const Cards: React.FC<CardProps> = ({columnid, columns}) => {
-    const [cards, setCards] = useState<ICard[]>([])
+const Cards: React.FC<CardProps> = ({columnid}) => {
+    const [cards, setCards] = useState<ICard[]>([])                                 // For updating card data
+    const [menuid, setMenuid] = useState<string>("")                                // For toggling card menu visible / not visible
+    const [renameid, setRenameid] = useState<string>("")                            // For toggling rename field visible / not visible
+    const [editContent, setEditContent] = useState<string>("")                      // For toggling card content editing field visible / not visible
 
-    const [menuid, setMenuid] = useState<string>("")
-    const [renameid, setRenameid] = useState<string>("")
-    const [editContent, setEditContent] = useState<string>("")
-    const [changeColor, setChangeColor] = useState<string>("")
+    const [changeColor, setChangeColor] = useState<string>("")                      // Used for userinput when changing card color
+    const [cardName, setCardsName] = useState<string>("New card")                   // Used for userinput when editing card title
+    const [cardContent, setCardsContent] = useState<string>("This is a new card.")  // Used for userinput when editing column content
 
-    const [reorderCard, setReorderCard] = useState<ICard | null>(null)
-
-    const [cardName, setCardsName] = useState<string>("New card")
-    const [cardContent, setCardsContent] = useState<string>("This is a new card.")
-
-    const [token, setToken] = useState<string | null>(null)
+    const [token, setToken] = useState<string | null>(null)                         // Used to get the jwt from browser storage
     
+    // Getting jwt from browser storage
     useEffect(() => {
         if (localStorage.getItem("token")) {
             setToken(localStorage.getItem("token"))
@@ -46,7 +45,7 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }, [token])
 
-    // Toggle tools to hide/show components when needed
+    // Toggle tools to hide/show components based on matching id's
     const toggleMenu = (cardid: string) => {
         if (menuid != "") {
             setMenuid("")
@@ -74,23 +73,16 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
-    const toggleChangeColor= (cardid: string) => {
+    const toggleChangeColor = (cardid: string) => {
         if (changeColor != "") {
             setChangeColor("")
         } else {
             setChangeColor(cardid)
         }
     }
+    // Toggle tools end
 
-    const toggleReorder= (card: ICard) => {
-        if (reorderCard != null) {
-            setReorderCard(null)
-        } else {
-            setReorderCard(card)
-        }
-    }
-
-    // functions to communicate with backend
+    // Sends columnid to backend and fetches cards matching the columnid. Updates cards usestate.
     const fetchData = async () => {
         try {
             const response = await fetch('http://localhost:3000/cards/fetchdata', {
@@ -116,6 +108,7 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         
     }
 
+    // Sends columnid to backend, receives the updated list of cards and updates cards usestate.
     const addCards = async () => {
         try {
             const response = await fetch("http://localhost:3000/cards/add", {
@@ -141,6 +134,8 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    // Sends the card id to backend and deletes it from the database.
+    // Receives the updated list of cards and updates cards usestate.
     const deleteCards = async (cardid: string) => {
         try {
             const response = await fetch('http://localhost:3000/cards/delete', {
@@ -166,6 +161,8 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    // Sends card id and the new card title to backend.
+    // Receives the updated list of cards and updates cards usestate.
     const renameCard = async (cardid: string) => {
         try {
             const response = await fetch('http://localhost:3000/cards/rename', {
@@ -191,6 +188,8 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    // Sends card id and the new card content to backend.
+    // Receives the updated list of cards and updates cards usestate.
     const editCardContent = async (cardid: string) => { 
         try {
             const response = await fetch('http://localhost:3000/cards/updatecontent', {
@@ -216,6 +215,8 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    // Sends card id and the new color to backend.
+    // Receives the updated list of cards and updates cards usestate.
     const changeCardColor = async (cardid: string, newcolor: string) => {
         try {
             const response = await fetch("http://localhost:3000/cards/updatecolor", {
@@ -241,8 +242,9 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
-    const reorderCards = async (card: ICard, newOrder: number) => {
-        toggleReorder(card)
+    // Sends the card that's being dragged (cardfrom) and the card that the first card is dropped on (cardto) and sends them to backend.
+    // Receives the updated list of cards and updates cards usestate.
+    const reorderCards = async (cardfrom: ICard, cardto: ICard) => {
         try {
             const response = await fetch("http://localhost:3000/cards/reorder", {
                 method: "POST",
@@ -250,7 +252,7 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
                     "Content-type": "application/json",
                     "Authorization": "Bearer " + token
                 },
-                body: JSON.stringify({ card: card, neworder: newOrder, columnid: columnid })
+                body: JSON.stringify({ cardfrom: cardfrom, cardto: cardto })
             })
 
             if (!response.ok) {
@@ -259,6 +261,11 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
             
             const data = await response.json()
             setCards(data.cards)
+            
+            // Refresh the page in order to update both of the columns affected by drag and drop
+            if (data.columns) {
+                window.location.href = "./board"
+            }
 
         } catch (error) {
             if (error instanceof Error) {
@@ -267,12 +274,41 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
         }
     }
 
+    // Drag and drop according to source 2.
+    const handleOnDrag = (e: React.DragEvent, card: ICard) => {
+        e.dataTransfer.setData("card", JSON.stringify(card))
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+    }
+
+    const handleOnDrop = (e: React.DragEvent, cardto: ICard) => {
+        const cardfrom: ICard = JSON.parse(e.dataTransfer.getData("card")) // The card we're dragging
+        console.log(cardfrom, cardto)
+        if (cardfrom._id === cardto._id) {
+            return
+        }
+        reorderCards(cardfrom, cardto)
+    }
+    // Drag and drop ends
+
 
     return (
         <>
             {cards.map((card) => (<>
-                <Card className='card' key={card['_id']} style={{backgroundColor: card.color}} onClick={() => {reorderCard && reorderCards(reorderCard, card.order)}}>
-                    {!(renameid===card['_id']) ? (<>
+                <Card 
+                    className='card' 
+                    key={card['_id']} 
+                    style={{backgroundColor: card.color}} 
+                    draggable
+                    onDragStart={(e) => {handleOnDrag(e, card)}}
+                    onDrop={(e) => {handleOnDrop(e, card)}}
+                    onDragOver={(e) => {handleDragOver(e)}} // This is needed so that the drag and drop event doesn't end before it's complete
+                >
+                    {!(renameid===card['_id']) ? ( 
+                    // Toggle open the card title rename field / card title
+                    <>
                         <CardHeader 
                             onDoubleClick={() => setRenameid(card['_id'])}
                             action={<>
@@ -295,17 +331,18 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
                         <Button onClick={() => {toggleRename(card['_id']), renameCard(card['_id'])}}>Save</Button>
                         <Button onClick={() => {toggleRename(card['_id'])}}>Discard</Button>
                     </>)}
-                    { // Card menu
+                    { 
+                    // Toggle open card menu
                     !(menuid===card['_id']) ? (<></>):(<>
                         <MenuList key={card['_id']}>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), deleteCards(card['_id'])}}>Delete</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleRename(card['_id'])}}>Rename</MenuItem>
                             <MenuItem onClick={() => {toggleMenu(card['_id']), toggleEditContent(card['_id'])}}>Edit content</MenuItem>
-                            <MenuItem onClick={() => {toggleMenu(card['_id']), toggleReorder(card)}}>Reorder</MenuItem>
                             <MenuItem onClick={() => {toggleChangeColor(card['_id'])}}>Change color</MenuItem>
                         </MenuList>
                     </>)}
-                    { // Color change menu
+                    { 
+                    // Toggle open card color changing menu
                     !(changeColor===card['_id']) ? (<></>):(<>
                         <MenuList className="color-menu" key={card['_id']}>
                             <MenuItem 
@@ -346,7 +383,9 @@ const Cards: React.FC<CardProps> = ({columnid, columns}) => {
                         </MenuList>
                     </>)}
                     <CardContent>
-                        {!(editContent===card['_id']) ? (<>
+                        {!(editContent===card['_id']) ? ( 
+                        // Toggle open card content changing text field / card content
+                        <>
                             <Typography variant="body1" sx={{ color: 'text.primary' }} onDoubleClick={() => {toggleEditContent(card['_id'])}}>
                                 {card['content']}
                             </Typography>

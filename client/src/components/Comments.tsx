@@ -13,18 +13,18 @@ interface IComment {
     _id: string
 }
 
-
 interface CardProps {
     cardid: string
 }
 
 const Comments: React.FC<CardProps> = ({cardid}) => {
-    const [comments, setComments] = useState<IComment[]>([])
-    const [token, setToken] = useState<string | null>(null)
-    const [newComment, setNewComment] = useState<boolean>(false)
-    const [expand, setExpand] = useState<boolean>(false)
-    const [commentContent, setCommentContent] = useState<string>("")
-        
+    const [comments, setComments] = useState<IComment[]>([])            // For updating comment data
+    const [token, setToken] = useState<string | null>(null)             // Used to get the jwt from browser storage
+    const [newComment, setNewComment] = useState<boolean>(false)        // For closing and opening the new comment textfield
+    const [expand, setExpand] = useState<boolean>(false)                // For expanding the comments
+    const [commentContent, setCommentContent] = useState<string>("")    // Used for userinput when adding a new comment
+    
+    // Getting jwt from browser memory
     useEffect(() => {
         if (localStorage.getItem("token")) {
             setToken(localStorage.getItem("token"))
@@ -32,7 +32,8 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
         }
     }, [token])
 
-
+    // Sends the card id to backend and receives the comments of that card
+    // Receives the updated list of comments and updates comments usestate.
     const fetchData = async () => {
         try {
             const response = await fetch('http://localhost:3000/comments/fetchdata', {
@@ -48,7 +49,6 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
                 throw new Error("Error while fetching data")
             }
             const data = await response.json()
-            console.log(data.comments)
             setComments(data.comments)
 
         } catch (error) {
@@ -58,6 +58,8 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
         }
     }
 
+    // Sends the new comments content and the card id to backend. 
+    // Receives the updated list of comments and updates comments usestate.
     const addComment = async () => {
         try {
             const response = await fetch('http://localhost:3000/comments/add', {
@@ -82,6 +84,8 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
         }
     }
 
+    // Sends the comment id to backend and deletes it from the database.
+    // Receives the updated list of comments and updates comments usestate.
     const deleteComment = async (commentid: string) => {
         try {
             const response = await fetch('http://localhost:3000/comments/delete', {
@@ -109,7 +113,8 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
 
     return (
         <>
-            {!expand ? (<>
+            {!expand ? ( // Show the comments if true
+            <>
                 <IconButton aria-label="expand" onClick={() => {setExpand(true)}}>
                     <ChevronRightIcon />
                 </IconButton>Show comments
@@ -127,15 +132,16 @@ const Comments: React.FC<CardProps> = ({cardid}) => {
                                 {comment['content']}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: "80%" }}>
-                                <sub>Created at: {comment['createdAt'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub><br/>
-                                <sub>Last edited: {comment['lastEdited'].toString().split(".")[0].replace("T", " ") /* Source 1 */}</sub>
+                                <sub>Created at: {comment['createdAt'].toString().split(".")[0].replace("T", " ")}</sub><br/>
+                                <sub>Last edited: {comment['lastEdited'].toString().split(".")[0].replace("T", " ")}</sub>
                             </Typography>
                             <Button onClick={() => {deleteComment(comment['_id'])}}>Delete</Button>
                         </CardContent>
                     </Card>
                 ))}
 
-                {!newComment ? (<>
+                {!newComment ? ( //Toggle open the textfield to add a new comment
+                <>
                     <Button onClick={() => {setNewComment(true)}}>Add comment</Button>
                 </>):(<>
                     <TextField

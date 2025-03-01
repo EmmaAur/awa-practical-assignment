@@ -1,5 +1,3 @@
-/* copied from week 8 tasks */
-
 import {Request, Response, NextFunction} from "express"
 import jwt, {JwtPayload} from "jsonwebtoken"
 import dotenv from "dotenv"

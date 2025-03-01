@@ -11,6 +11,7 @@ const Card_1 = require("../models/Card");
 const Comment_1 = require("../models/Comment");
 const validateToken_1 = require("../middleware/validateToken");
 const mongodb_1 = require("mongodb");
+const Column_1 = require("../models/Column");
 const router = (0, express_1.Router)();
 router.post("/cards/fetchdata", validateToken_1.validateToken, async (req, res) => {
     /*
@@ -18,7 +19,7 @@ router.post("/cards/fetchdata", validateToken_1.validateToken, async (req, res) 
     { columnid: string }
     */
     try {
-        // fetch the cards and send them back
+        // fetch the cards and send them back to frontend
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
         if (!cards) {
             res.status(500).json({ error: "Card not found." });
@@ -70,8 +71,9 @@ router.delete("/cards/delete", validateToken_1.validateToken, async (req, res) =
         await Comment_1.Comment.deleteMany({ cardid: req.body.cardid });
         // Reset the cards' order
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
-        const reorderedCards = reorderCards(cards); // This code was got from source 2
-        // In order to reorder the cards in the database, we delete the previous cards and then insert the newly ordered list of cards
+        const reorderedCards = reorderCards(cards);
+        // In order to reorder the cards in the database, we delete the previous cards 
+        // and then insert the newly ordered list of cards into the database
         await Card_1.Card.deleteMany({ columnid: req.body.columnid });
         await Card_1.Card.insertMany(reorderedCards);
         // Send back the reordered cards
@@ -87,9 +89,18 @@ router.post("/cards/rename", validateToken_1.validateToken, async (req, res) => 
     req.body requires:
     { cardid: string, columnid: string, newtitle: string }
     */
-    await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { title: req.body.newtitle } });
-    let cards = await Card_1.Card.find({ columnid: req.body.columnid });
-    res.status(200).json({ cards: cards });
+    try {
+        // Find the card using the cardid and update the name and lastEdited attributes
+        const edited = new Date();
+        await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { title: req.body.newtitle, lastEdited: edited } });
+        // Send back the updated list of cards
+        let cards = await Card_1.Card.find({ columnid: req.body.columnid });
+        res.status(200).json({ cards: cards });
+    }
+    catch (error) {
+        console.log("Error while fecthing data:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 router.post("/cards/updatecontent", validateToken_1.validateToken, async (req, res) => {
     /*
@@ -97,7 +108,10 @@ router.post("/cards/updatecontent", validateToken_1.validateToken, async (req, r
     { columnid: string, cardid: string, newcontent: string }
     */
     try {
-        await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { content: req.body.newcontent } });
+        // Find the card using the cardid and update the content and lastEdited attributes
+        const edited = new Date();
+        await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { content: req.body.newcontent, lastEdited: edited } });
+        // Send back the updated list of cards
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
         res.status(200).json({ cards: cards });
     }
@@ -112,8 +126,10 @@ router.post("/cards/updatecolor", validateToken_1.validateToken, async (req, res
     { cardid: string, columnid: stirng, newcolor: string }
     */
     try {
+        // Find the card using the cardid and update the color and lastEdited attributes
         const edited = new Date();
         await Card_1.Card.findOneAndUpdate({ _id: new mongodb_1.ObjectId(req.body.cardid) }, { $set: { color: req.body.newcolor, lastEdited: edited } });
+        // Send back the updated list of cards
         let cards = await Card_1.Card.find({ columnid: req.body.columnid });
         res.status(200).json({ cards: cards });
     }
@@ -125,38 +141,41 @@ router.post("/cards/updatecolor", validateToken_1.validateToken, async (req, res
 router.post("/cards/reorder", validateToken_1.validateToken, async (req, res) => {
     /*
     req.body requires:
-    { card: ICard, neworder: number, columnid: string }
+    { cardfrom: ICard, cardto: ICard }
+     -> cardfrom is the card that is moved from its original position and cardto is where it's moved to
     */
     try {
-        // remove the card from its old index
-        const cards = await Card_1.Card.find({ columnid: req.body.columnid });
-        let currentIndex = req.body.card.order;
-        cards.splice(currentIndex, 1);
-        console.log("\nin /cards/reorder, when card removed:", cards);
-        // Add the card on it's desired index and reset the order attributes of the cards using reorderCards
-        cards.splice(req.body.neworder, 0, req.body.card);
-        console.log("\nin /cards/reorder, when card added back:", cards);
-        const reorderedCards = reorderCards(cards);
-        console.log("\nAfter reorder", reorderedCards);
-        // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
-        await Card_1.Card.deleteMany({ columnid: req.body.columnid });
-        // Add the new card to the database
-        const newCards = [];
-        reorderedCards.forEach(card => {
-            const carddata = new Card_1.Card({
-                title: card.title,
-                content: card.content,
-                color: card.color,
-                columnid: card.columnid,
-                order: card.order,
-                createdAt: card.createdAt,
-            });
-            newCards.push(carddata);
-        });
-        await Card_1.Card.insertMany(newCards);
-        console.log("\nnewCards:", newCards);
-        // Send back the reordered cards
-        res.status(200).json({ cards: newCards });
+        // remove the card from its old position
+        if (req.body.cardfrom.columnid === req.body.cardto.columnid) {
+            const cards = await Card_1.Card.find({ columnid: req.body.cardfrom.columnid });
+            let currentIndex = req.body.cardfrom.order;
+            cards.splice(currentIndex, 1);
+            // Add the card on it's desired index and reset the order attributes of the cards using reorderCards
+            cards.splice(req.body.cardto.order, 0, req.body.cardfrom);
+            const reorderedCards = reorderCards(cards);
+            // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+            await Card_1.Card.deleteMany({ columnid: req.body.cardfrom.columnid });
+            await Card_1.Card.insertMany(reorderedCards);
+            // Send back the reordered cards
+            console.log(reorderedCards);
+            res.status(200).json({ cards: reorderedCards });
+        }
+        else {
+            // Cardfrom gets removed from it's original column and fetch the new columns cards
+            await Card_1.Card.deleteOne({ _id: new mongodb_1.ObjectId(req.body.cardfrom._id) });
+            const cards = await Card_1.Card.find({ columnid: req.body.cardto.columnid });
+            // Change the cardfrom columnid to match with cardto columnid:
+            req.body.cardfrom.columnid = req.body.cardto.columnid;
+            // Then the card gets added to it's new required position in the other column (reorder the cards)
+            cards.splice(req.body.cardto.order, 0, req.body.cardfrom);
+            const reorderedCards = reorderCards(cards);
+            // In order to reorder the cards data in the database, we delete the previous cards and insert the newly ordered list of cards
+            await Card_1.Card.deleteMany({ columnid: req.body.cardto.columnid });
+            await Card_1.Card.insertMany(reorderedCards);
+            // Send back the reordered cards and columns for colum refresh:
+            const columns = await Column_1.Column.find({ owner: req.user?.username });
+            res.status(200).json({ cards: reorderedCards, columns: columns });
+        }
     }
     catch (error) {
         console.log("Error while fecthing data:", error);
@@ -164,6 +183,7 @@ router.post("/cards/reorder", validateToken_1.validateToken, async (req, res) =>
     }
 });
 const reorderCards = (cards) => {
+    // Function to reset the "order" attributes of cards.
     let order = 0;
     cards.forEach(card => {
         card.order = order;
