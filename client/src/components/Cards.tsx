@@ -329,7 +329,7 @@ const Cards: React.FC<CardProps> = ({columnid}) => {
                             onChange={(e) => {setCardsName(e.target.value)}}>
                         </TextField>
                         <Button onClick={() => {toggleRename(card['_id']), renameCard(card['_id'])}}>Save</Button>
-                        <Button onClick={() => {toggleRename(card['_id'])}}>Discard</Button>
+                        <Button onClick={() => {toggleRename(card['_id']), setCardsName(card['title'])}}>Discard</Button>
                     </>)}
                     { 
                     // Toggle open card menu
@@ -406,7 +406,7 @@ const Cards: React.FC<CardProps> = ({columnid}) => {
                                 defaultValue={card['content']}>
                             </TextField>
                             <Button onClick={() => {toggleEditContent(card['_id']), editCardContent(card['_id'])}}>Save</Button>
-                            <Button onClick={() => {toggleEditContent(card['_id'])}}>Discard</Button>
+                            <Button onClick={() => {toggleEditContent(card['_id']), setCardsContent(card['content'])}}>Discard</Button>
                         </>)}
                     </CardContent>
                 </Card>

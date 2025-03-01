@@ -11,10 +11,10 @@ Round div corners: https://www.w3schools.com/css/css3_borders.asp
     background-color: white;
     gap: 16px;
     padding: 16px;
-    max-width: 30%;
     margin: auto;
     margin-top: 10%;
     min-width: 200px;
+    max-width: 350px;
 }
 
 .login-button {

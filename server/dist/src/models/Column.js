@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Column = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const DATE_TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
 let columnSchema = new mongoose_1.Schema({
     owner: { type: String, required: true },
     columnname: { type: String, required: true },

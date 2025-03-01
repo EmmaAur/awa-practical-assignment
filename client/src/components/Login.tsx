@@ -3,11 +3,13 @@ import Button from '@mui/material/Button'
 import '../styles/login.css'
 import { useState } from 'react'
 import Box from '@mui/material/Box'
+import { Typography } from '@mui/material'
 
 
 const Login = () => {
     const [password, setPassword] = useState<string>('')
     const [email, setemail] = useState<string>('')
+    const [loginFailed, setLoginFailed] = useState<boolean>(false)
     
     // Sends login data to backend and if data is valid and user is found, 
     // sends user the jwt token and redirects them to /board.
@@ -37,6 +39,7 @@ const Login = () => {
             }
 
         } catch (error) {
+            setLoginFailed(true)
             if (error instanceof Error) {
                 console.log("Error when trying to log in")
             }
@@ -45,8 +48,7 @@ const Login = () => {
     }
 
     return (
-        <div className='login-div'>
-            
+        <div>
             <Box
                 className="login-div"
                 component="form"
@@ -72,7 +74,13 @@ const Login = () => {
                     variant="standard"
                     type="password"
                     onChange={(e) => {setPassword(e.target.value)}}
-                /><br></br>
+                />
+                {loginFailed && (
+                    <>
+                        <Typography variant="body2" sx={{ color: 'red' }}>Login failed. Email or password incorrect.</Typography>
+                    </>
+                )}
+                <br></br>
                 <Button 
                     className="login-button" 
                     variant="contained"

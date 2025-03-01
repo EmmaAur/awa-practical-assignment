@@ -3,12 +3,15 @@ import Button from '@mui/material/Button'
 import '../styles/login.css'
 import { useState } from 'react'
 import Box from '@mui/material/Box'
+import { Tooltip, Typography } from '@mui/material'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 
 
 const Register = () => {
     const [password, setPassword] = useState<string>('')
     const [username, setUsername] = useState<string>('')
     const [email, setEmail] = useState<string>('')
+    const [registerFailed, setRegisterFailed] = useState<boolean>(false)
     
     // Sends register data to backend and if data is valid, redirects the user to log in page
     const fetchData = async (username: string, password: string, email: string) => {
@@ -35,6 +38,7 @@ const Register = () => {
             }
 
         } catch (error) {
+            setRegisterFailed(true)
             if (error instanceof Error) {
                 console.log("Error when trying to register")
             }
@@ -75,7 +79,16 @@ const Register = () => {
                     type="password"
                     variant="standard"
                     onChange={(e) => {setPassword(e.target.value)}}
-                /><br></br>
+                />
+                <Tooltip title={"Password requirements: at least 8 characters long and contains 1 or more special characters, 1 or more uppercase letter, 1 or more lower case letter. Username requirements: 3-25 characters long."}>
+                    <HelpOutlineIcon color='primary'/>
+                </Tooltip>
+                {registerFailed && (
+                    <>
+                        <Typography variant="body2" sx={{ color: 'red' }}>Register failed. Password or username is insufficient.</Typography>
+                    </>
+                )}
+                <br></br>
                 <Button 
                     className="login-button" 
                     variant="contained"

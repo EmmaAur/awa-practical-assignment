@@ -206,7 +206,7 @@ const Board = () => {
                                 onChange={(e) => {setColumnName(e.target.value)}}>
                             </TextField>
                             <Button onClick={() => {toggleRename(column['_id']), renameColumn(column['_id'])}}>Save</Button>
-                            <Button onClick={() => {toggleRename(column['_id'])}}>Discard</Button>
+                            <Button onClick={() => {toggleRename(column['_id']), setColumnName(column['columnname'])}}>Discard</Button>
                         </>)}
 
                         {!(menuid===column['_id']) ? (<></>):( // Show either nothing or the column menu
